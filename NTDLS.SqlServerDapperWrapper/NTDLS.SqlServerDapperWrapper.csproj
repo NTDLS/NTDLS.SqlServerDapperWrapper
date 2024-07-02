@@ -15,9 +15,9 @@
     <RepositoryUrl>https://github.com/NTDLS/NTDLS.SqlServerDapperWrapper</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <PackageReleaseNotes>
-      Readme fix.
+      Added constructors to SqlServerManagedInstance.
     </PackageReleaseNotes>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>sqlite;dapper;managed;simple;</PackageTags>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

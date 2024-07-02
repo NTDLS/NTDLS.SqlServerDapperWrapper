@@ -4,10 +4,14 @@ namespace TestApp
 {
     internal class Program
     {
-        public static ManagedDataStorageFactory MyConnection { get; set; } = new("localhost", "tempdb");
+        public static SqlServerManagedFactory MyConnection { get; set; } = new("localhost", "tempdb");
 
         static void Main()
         {
+            var otherConnection = new SqlServerManagedInstance("");
+
+            
+
             //Each time a statement/query is executed, the NTDLS.SqlServerDapperWrapper will
             //  open a connection, execute then close & dispose the connection. 
             MyConnection.Execute("DROP TABLE IF EXISTS Test");

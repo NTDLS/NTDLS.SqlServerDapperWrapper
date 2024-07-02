@@ -5,7 +5,7 @@ namespace NTDLS.SqlServerDapperWrapper
     /// <summary>
     /// An instance that creates ManagedDataStorageInstances based off of the connection string stored in this class.
     /// </summary>
-    public class ManagedDataStorageFactory
+    public class SqlServerManagedFactory
     {
         /// <summary>
         /// The connection string that will be used by the factory, can be set using SetConnectionString().
@@ -16,7 +16,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// Delegate used for ephemeral operations.
         /// </summary>
         /// <param name="connection"></param>
-        public delegate void EphemeralProc(ManagedDataStorageInstance connection);
+        public delegate void EphemeralProc(SqlServerManagedInstance connection);
 
         /// <summary>
         /// Delegate used for ephemeral operations.
@@ -24,7 +24,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="connection"></param>
         /// <returns></returns>
-        public delegate T EphemeralProc<T>(ManagedDataStorageInstance connection);
+        public delegate T EphemeralProc<T>(SqlServerManagedInstance connection);
 
         #region Constructors.
 
@@ -32,7 +32,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// Creates a new instance of ManagedDataStorageFactory.
         /// </summary>
         /// <param name="connectionString"></param>
-        public ManagedDataStorageFactory(string connectionString)
+        public SqlServerManagedFactory(string connectionString)
         {
             DefaultConnectionString = connectionString;
         }
@@ -40,7 +40,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <summary>
         /// Creates a new instance of ManagedDataStorageFactory.
         /// </summary>
-        public ManagedDataStorageFactory(string serverName, string databaseName)
+        public SqlServerManagedFactory(string serverName, string databaseName)
         {
             DefaultConnectionString = new SqlConnectionStringBuilder()
             {
@@ -54,7 +54,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <summary>
         /// Creates a new instance of ManagedDataStorageFactory.
         /// </summary>
-        public ManagedDataStorageFactory(string serverName, string databaseName, string username, string password)
+        public SqlServerManagedFactory(string serverName, string databaseName, string username, string password)
         {
             DefaultConnectionString = new SqlConnectionStringBuilder()
             {
@@ -70,7 +70,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <summary>
         /// Creates a new instance of ManagedDataStorageFactory.
         /// </summary>
-        public ManagedDataStorageFactory()
+        public SqlServerManagedFactory()
         {
         }
 
@@ -91,7 +91,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="func"></param>
         public void Ephemeral(EphemeralProc func)
         {
-            using var connection = new ManagedDataStorageInstance(DefaultConnectionString);
+            using var connection = new SqlServerManagedInstance(DefaultConnectionString);
             func(connection);
         }
 
@@ -103,7 +103,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T Ephemeral<T>(EphemeralProc<T> func)
         {
-            using var connection = new ManagedDataStorageInstance(DefaultConnectionString);
+            using var connection = new SqlServerManagedInstance(DefaultConnectionString);
             return func(connection);
         }
 
@@ -114,7 +114,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="func"></param>
         public void Ephemeral(string connectionString, EphemeralProc func)
         {
-            using var connection = new ManagedDataStorageInstance(connectionString);
+            using var connection = new SqlServerManagedInstance(connectionString);
             func(connection);
         }
 
@@ -127,7 +127,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T Ephemeral<T>(string connectionString, EphemeralProc<T> func)
         {
-            using var connection = new ManagedDataStorageInstance(connectionString);
+            using var connection = new SqlServerManagedInstance(connectionString);
             return func(connection);
         }
 

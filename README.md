@@ -6,8 +6,11 @@ Provides a simple interface to a SQL Server database with automatic cleanup and 
 All managed and wrapped in Dapper (hence the name).
 
 >**Examples:**
+Keep in mind that you can also use the **SqlServerManagedInstance** directly if you really want long lived processes.
+
+
 ```csharp
-public static ManagedDataStorageFactory MyConnection { get; set; } = new("localhost", "tempdb");
+public static SqlServerManagedFactory MyConnection { get; set; } = new("localhost", "tempdb");
 ```
 
 ```csharp

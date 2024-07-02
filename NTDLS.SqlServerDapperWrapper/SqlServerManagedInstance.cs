@@ -9,7 +9,7 @@ namespace NTDLS.SqlServerDapperWrapper
     /// A disposable database connection wrapper that functions as an ephemeral instance.
     /// One instance of this class is generally created per query.
     /// </summary>
-    public class ManagedDataStorageInstance : IDisposable
+    public class SqlServerManagedInstance : IDisposable
     {
         private static readonly Regex _isProcedureNameRegex = new(@"^(\[.*\]|\w+)$", RegexOptions.IgnoreCase);
         private SqlTransaction? _transaction;
@@ -25,7 +25,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <summary>
         /// Creases a new instance of ManagedDataStorageInstance.
         /// </summary>
-        public ManagedDataStorageInstance(SqlConnectionStringBuilder builder)
+        public SqlServerManagedInstance(SqlConnectionStringBuilder builder)
         {
             NativeConnection = new SqlConnection(builder.ToString());
             NativeConnection.Open();
@@ -34,8 +34,44 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <summary>
         /// Creases a new instance of ManagedDataStorageInstance.
         /// </summary>
-        public ManagedDataStorageInstance(string connectionString)
+        public SqlServerManagedInstance(string connectionString)
         {
+            NativeConnection = new SqlConnection(connectionString);
+            NativeConnection.Open();
+        }
+
+        /// <summary>
+        /// Creates a new instance of ManagedDataStorageInstance.
+        /// </summary>
+        public SqlServerManagedInstance(string serverName, string databaseName)
+        {
+            var connectionString = new SqlConnectionStringBuilder()
+            {
+                DataSource = serverName,
+                InitialCatalog = databaseName,
+                TrustServerCertificate = true,
+                IntegratedSecurity = true,
+            }.ToString();
+
+            NativeConnection = new SqlConnection(connectionString);
+            NativeConnection.Open();
+        }
+
+        /// <summary>
+        /// Creates a new instance of ManagedDataStorageInstance.
+        /// </summary>
+        public SqlServerManagedInstance(string serverName, string databaseName, string username, string password)
+        {
+            var connectionString = new SqlConnectionStringBuilder()
+            {
+                DataSource = serverName,
+                InitialCatalog = databaseName,
+                TrustServerCertificate = true,
+                IntegratedSecurity = false,
+                UserID = username,
+                Password = password
+            }.ToString();
+
             NativeConnection = new SqlConnection(connectionString);
             NativeConnection.Open();
         }
