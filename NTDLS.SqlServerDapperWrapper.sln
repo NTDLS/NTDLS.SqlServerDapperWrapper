@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34714.143
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NTDLS.SqlServerDapperWrapper", "NTDLS.SqlServerDapperWrapper\NTDLS.SqlServerDapperWrapper.csproj", "{EF4AF3D3-80C4-4296-B998-2195FBD083EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{90C2563D-BB74-41C0-8797-1C695A27434B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{BD1B21CD-0A08-4934-BF36-77985E97F152}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EF4AF3D3-80C4-4296-B998-2195FBD083EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF4AF3D3-80C4-4296-B998-2195FBD083EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF4AF3D3-80C4-4296-B998-2195FBD083EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF4AF3D3-80C4-4296-B998-2195FBD083EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90C2563D-BB74-41C0-8797-1C695A27434B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90C2563D-BB74-41C0-8797-1C695A27434B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90C2563D-BB74-41C0-8797-1C695A27434B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90C2563D-BB74-41C0-8797-1C695A27434B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0522117F-EB5B-435E-87BF-A9A5C1240A87}
+	EndGlobalSection
+EndGlobal
