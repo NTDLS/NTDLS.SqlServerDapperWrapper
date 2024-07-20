@@ -18,8 +18,24 @@ public static SqlServerManagedFactory MyConnection { get; set; } = new("localhos
 //Each time a statement/query is executed, the NTDLS.SqlServerDapperWrapper will
 //  open a connection, execute then close & dispose the connection. 
 MyConnection.Execute("DROP TABLE IF EXISTS Test");
-
 ```
+
+```csharp
+//We can execure procedures, t-sql text, or embedded .sql files:
+
+//Test procedure execution.
+var procValue = MyConnection.ExecuteScalar<DateTime>("TestProc");
+Console.WriteLine($"procValue: {procValue}");
+
+//Test tSQL execution.
+var textValue = MyConnection.ExecuteScalar<DateTime>("SELECT GetDate()");
+Console.WriteLine($"textValue: {textValue}");
+
+//Test embedded resource script execution.
+var sqlValue = MyConnection.ExecuteScalar<DateTime>("TestSqlFile.sql");
+Console.WriteLine($"sqlValue: {textValue}");
+```
+
 ```csharp
 //Creates a table in two different databases from a script that is an embedded resource in the project.
 MyConnection.Execute("CREATE TABLE Test( Id int identity(1,1) not null, [Name] varchar(128) NOT NULL, [Description] varchar(128) NULL)");

@@ -8,6 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="TestSqlFile.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="TestSqlFile.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\NTDLS.SqlServerDapperWrapper\NTDLS.SqlServerDapperWrapper.csproj" />
   </ItemGroup>
 

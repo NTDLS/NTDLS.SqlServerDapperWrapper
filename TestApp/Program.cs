@@ -1,4 +1,5 @@
 ﻿using NTDLS.SqlServerDapperWrapper;
+using System.Data.Common;
 
 namespace TestApp
 {
@@ -8,9 +9,20 @@ namespace TestApp
 
         static void Main()
         {
-            var otherConnection = new SqlServerManagedInstance("");
+            //Create a test procedure.
+            MyConnection.Execute("CREATE OR ALTER PROCEDURE TestProc AS\r\nBEGIN\r\n\tSELECT GetDate()\r\nEND\r\n");
 
-            
+            //Test procedure execution.
+            var procValue = MyConnection.ExecuteScalar<DateTime>("TestProc");
+            Console.WriteLine($"procValue: {procValue}");
+
+            //Test tSQL execution.
+            var textValue = MyConnection.ExecuteScalar<DateTime>("SELECT GetDate()");
+            Console.WriteLine($"textValue: {textValue}");
+
+            //Test embedded resource script execution.
+            var sqlValue = MyConnection.ExecuteScalar<DateTime>("TestSqlFile.sql");
+            Console.WriteLine($"sqlValue: {textValue}");
 
             //Each time a statement/query is executed, the NTDLS.SqlServerDapperWrapper will
             //  open a connection, execute then close & dispose the connection. 
@@ -70,6 +82,9 @@ namespace TestApp
             {
                 Console.WriteLine($"{result.Id} {result.Name} {result.Description}");
             }
+
+            Console.WriteLine("Press [enter] to exit.");
+            Console.ReadLine();
         }
     }
 }

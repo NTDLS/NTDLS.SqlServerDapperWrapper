@@ -1,6 +1,8 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Reflection;
+using System.Runtime.Caching;
 using System.Text.RegularExpressions;
 
 namespace NTDLS.SqlServerDapperWrapper
@@ -11,6 +13,7 @@ namespace NTDLS.SqlServerDapperWrapper
     /// </summary>
     public class SqlServerManagedInstance : IDisposable
     {
+        private static readonly MemoryCache _cache = new("ManagedDataStorageInstance");
         private static readonly Regex _isProcedureNameRegex = new(@"^(\[.*\]|\w+)$", RegexOptions.IgnoreCase);
         private SqlTransaction? _transaction;
         private bool _disposed = false;
@@ -169,6 +172,91 @@ namespace NTDLS.SqlServerDapperWrapper
             return _transaction;
         }
 
+        /// <summary>
+        /// Returns the given text, or if the script ends with ".sql", the script will be
+        /// located and loaded form the executing assembly (assuming it is an embedded resource).
+        /// </summary>
+        /// <param name="script"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static string TranslateSqlScript(string script)
+        {
+            string cacheKey = $":{script.ToLower()}".Replace('.', ':');
+
+            if (cacheKey.EndsWith(":sql"))
+            {
+                if (_cache.Get(cacheKey) is string cachedScriptText)
+                {
+                    return cachedScriptText;
+                }
+
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+                foreach (var assembly in assemblies)
+                {
+                    var scriptText = SearchAssembly(assembly, cacheKey);
+                    if (scriptText != null)
+                    {
+                        return scriptText;
+                    }
+                }
+
+                throw new Exception($"The embedded script resource could not be found after enumeration: '{cacheKey}'");
+            }
+
+            return script;
+        }
+
+        /// <summary>
+        /// Searches the given assembly for a script file.
+        /// </summary>
+        /// <param name="assembly"></param>
+        /// <param name="cacheKey"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        private static string? SearchAssembly(Assembly assembly, string cacheKey)
+        {
+            var allScriptNames = _cache.Get($"TranslateSqlScript:SearchAssembly:{assembly.FullName}") as List<string>;
+            if (allScriptNames == null)
+            {
+                allScriptNames = assembly.GetManifestResourceNames().Where(o => o.ToLower().EndsWith(".sql"))
+                    .Select(o => $":{o}".Replace('.', ':')).ToList();
+                _cache.Add("TranslateSqlScript:Names", allScriptNames, new CacheItemPolicy
+                {
+                    SlidingExpiration = new TimeSpan(1, 0, 0)
+                });
+            }
+
+            if (allScriptNames.Count > 0)
+            {
+                var script = allScriptNames.Where(o => o.ToLower().EndsWith(cacheKey)).ToList();
+                if (script.Count > 1)
+                {
+                    throw new Exception($"The script name is ambiguous: {cacheKey}.");
+                }
+                else if (script == null || script.Count == 0)
+                {
+                    return null;
+                }
+
+                using var stream = assembly.GetManifestResourceStream(script.Single().Replace(':', '.').Trim(new char[] { '.' }))
+                    ?? throw new InvalidOperationException("Script not found: " + cacheKey);
+
+                using var reader = new StreamReader(stream);
+                var scriptText = reader.ReadToEnd();
+
+                _cache.Add(cacheKey, allScriptNames, new CacheItemPolicy
+                {
+                    SlidingExpiration = new TimeSpan(1, 0, 0)
+                });
+
+                return scriptText;
+            }
+
+            return null;
+        }
+
         #region Query/Execute passthrough.
 
         /// <summary>
@@ -178,7 +266,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlText"></param>
         /// <returns></returns>
         public IEnumerable<T> Query<T>(string sqlText)
-            => NativeConnection.Query<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.Query<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the results.
@@ -188,7 +279,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="param"></param>
         /// <returns></returns>
         public IEnumerable<T> Query<T>(string sqlText, object param)
-            => NativeConnection.Query<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.Query<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result.
@@ -198,7 +292,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="defaultValue"></param>
         /// <returns></returns>
         public T ExecuteScalar<T>(string sqlText, T defaultValue)
-            => NativeConnection.ExecuteScalar<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.ExecuteScalar<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result.
@@ -209,7 +306,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="defaultValue"></param>
         /// <returns></returns>
         public T ExecuteScalar<T>(string sqlText, object param, T defaultValue)
-            => NativeConnection.ExecuteScalar<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.ExecuteScalar<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
@@ -218,7 +318,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlText"></param>
         /// <returns></returns>
         public T QueryFirst<T>(string sqlText)
-            => NativeConnection.QueryFirst<T>(sqlText);
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.QueryFirst<T>(sqlText);
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
@@ -228,7 +331,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="param"></param>
         /// <returns></returns>
         public T QueryFirst<T>(string sqlText, object param)
-            => NativeConnection.QueryFirst<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.QueryFirst<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
@@ -238,7 +344,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="defaultValue"></param>
         /// <returns></returns>
         public T QueryFirstOrDefault<T>(string sqlText, T defaultValue)
-            => NativeConnection.QueryFirstOrDefault<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.QueryFirstOrDefault<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
@@ -249,7 +358,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="defaultValue"></param>
         /// <returns></returns>
         public T QueryFirstOrDefault<T>(string sqlText, object param, T defaultValue)
-            => NativeConnection.QueryFirstOrDefault<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.QueryFirstOrDefault<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
@@ -258,7 +370,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlText"></param>
         /// <returns></returns>
         public T QuerySingle<T>(string sqlText)
-            => NativeConnection.QuerySingle<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.QuerySingle<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
@@ -268,7 +383,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="param"></param>
         /// <returns></returns>
         public T QuerySingle<T>(string sqlText, object param)
-            => NativeConnection.QuerySingle<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.QuerySingle<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -278,7 +396,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="defaultValue"></param>
         /// <returns></returns>
         public T QuerySingleOrDefault<T>(string sqlText, T defaultValue)
-            => NativeConnection.QuerySingleOrDefault<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.QuerySingleOrDefault<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -289,7 +410,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="defaultValue"></param>
         /// <returns></returns>
         public T QuerySingleOrDefault<T>(string sqlText, object param, T defaultValue)
-            => NativeConnection.QuerySingleOrDefault<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.QuerySingleOrDefault<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+        }
 
         /// <summary>
         /// /// Queries the database using the given script name or SQL text and returns a scalar value throws an exception.
@@ -298,7 +422,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlText"></param>
         /// <returns></returns>
         public T? ExecuteScalar<T>(string sqlText)
-            => NativeConnection.ExecuteScalar<T>(sqlText);
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.ExecuteScalar<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        }
 
         /// <summary>
         /// /// Queries the database using the given script name or SQL text and returns a scalar value throws an exception.
@@ -308,7 +435,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="param"></param>
         /// <returns></returns>
         public T? ExecuteScalar<T>(string sqlText, object param)
-            => NativeConnection.ExecuteScalar<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.ExecuteScalar<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
@@ -317,7 +447,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlText"></param>
         /// <returns></returns>
         public T? QueryFirstOrDefault<T>(string sqlText)
-            => NativeConnection.QueryFirstOrDefault<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.QueryFirstOrDefault<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
@@ -327,7 +460,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="param"></param>
         /// <returns></returns>
         public T? QueryFirstOrDefault<T>(string sqlText, object param)
-            => NativeConnection.QueryFirstOrDefault<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.QueryFirstOrDefault<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -336,7 +472,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlText"></param>
         /// <returns></returns>
         public T? QuerySingleOrDefault<T>(string sqlText)
-            => NativeConnection.QuerySingleOrDefault<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.QuerySingleOrDefault<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -346,14 +485,20 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="param"></param>
         /// <returns></returns>
         public T? QuerySingleOrDefault<T>(string sqlText, object param)
-            => NativeConnection.QuerySingleOrDefault<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            return NativeConnection.QuerySingleOrDefault<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        }
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
         /// </summary>
         /// <param name="sqlText"></param>
         public void Execute(string sqlText)
-            => NativeConnection.Execute(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            NativeConnection.Execute(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        }
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
@@ -361,7 +506,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlText"></param>
         /// <param name="param"></param>
         public void Execute(string sqlText, object param)
-            => NativeConnection.Execute(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        {
+            sqlText = TranslateSqlScript(sqlText);
+            NativeConnection.Execute(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+        }
 
         #endregion
     }
