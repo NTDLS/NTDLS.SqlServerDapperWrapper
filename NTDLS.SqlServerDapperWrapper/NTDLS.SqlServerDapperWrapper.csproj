@@ -17,7 +17,7 @@
     <PackageReleaseNotes>
       Dependency updates.
     </PackageReleaseNotes>
-    <Version>1.2.2</Version>
+    <Version>1.2.3</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>sqlite;dapper;managed;simple;</PackageTags>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -49,9 +49,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.35" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
-    <PackageReference Include="System.Runtime.Caching" Version="9.0.0" />
+    <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
+    <PackageReference Include="System.Runtime.Caching" Version="9.0.3" />
   </ItemGroup>
 
 </Project>
