@@ -15,9 +15,9 @@
     <RepositoryUrl>https://github.com/NTDLS/NTDLS.SqlServerDapperWrapper</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <PackageReleaseNotes>
-      Dependency updates.
+      Fixed search for script in sub-directory.
     </PackageReleaseNotes>
-    <Version>1.2.3</Version>
+    <Version>1.2.4</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>sqlite;dapper;managed;simple;</PackageTags>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
