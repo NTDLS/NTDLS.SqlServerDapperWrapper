@@ -17,7 +17,7 @@
     <PackageReleaseNotes>
       Fixed search for script in sub-directory.
     </PackageReleaseNotes>
-    <Version>1.2.4</Version>
+    <Version>1.2.5</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>sqlite;dapper;managed;simple;</PackageTags>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -50,8 +50,8 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.66" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
-    <PackageReference Include="System.Runtime.Caching" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
+    <PackageReference Include="System.Runtime.Caching" Version="9.0.4" />
   </ItemGroup>
 
 </Project>
