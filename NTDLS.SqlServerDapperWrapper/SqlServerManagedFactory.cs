@@ -410,7 +410,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
         public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource)
-            => await Ephemeral(DefaultConnectionString, async o => await o.QueryAsync<T>(sqlTextOrEmbeddedResource));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryAsync<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the results.
@@ -420,7 +420,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="param"></param>
         /// <returns></returns>
         public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource, object param)
-            => await Ephemeral(DefaultConnectionString, async o => await o.QueryAsync<T>(sqlTextOrEmbeddedResource, param));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryAsync<T>(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
@@ -429,7 +429,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
         public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource)
-            => await Ephemeral(DefaultConnectionString, async o => await o.QueryFirstAsync<T>(sqlTextOrEmbeddedResource));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstAsync<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
@@ -439,7 +439,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="defaultValue"></param>
         /// <returns></returns>
         public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
-            => await Ephemeral(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource)) ?? defaultValue;
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
@@ -449,7 +449,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="param"></param>
         /// <returns></returns>
         public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource, object param)
-            => await Ephemeral(DefaultConnectionString, async o => await o.QueryFirstAsync<T>(sqlTextOrEmbeddedResource, param));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstAsync<T>(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
@@ -460,7 +460,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="defaultValue"></param>
         /// <returns></returns>
         public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
-            => await Ephemeral(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param)) ?? defaultValue;
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
@@ -469,7 +469,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
         public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource)
-            => await Ephemeral(DefaultConnectionString, async o => await o.QuerySingleAsync<T>(sqlTextOrEmbeddedResource));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleAsync<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
@@ -479,7 +479,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="param"></param>
         /// <returns></returns>
         public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource, object param)
-            => await Ephemeral(DefaultConnectionString, async o => await o.QuerySingleAsync<T>(sqlTextOrEmbeddedResource, param));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleAsync<T>(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -489,7 +489,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="defaultValue"></param>
         /// <returns></returns>
         public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
-            => await Ephemeral(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, defaultValue));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, defaultValue));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -500,7 +500,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="defaultValue"></param>
         /// <returns></returns>
         public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
-            => await Ephemeral(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, defaultValue));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, defaultValue));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -509,7 +509,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
         public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource)
-            => await Ephemeral(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -519,7 +519,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="param"></param>
         /// <returns></returns>
         public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param)
-            => await Ephemeral(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -528,7 +528,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
         public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource)
-            => await Ephemeral(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -538,14 +538,14 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="param"></param>
         /// <returns></returns>
         public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param)
-            => await Ephemeral(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
         /// </summary>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         public async Task ExecuteAsync(string sqlTextOrEmbeddedResource)
-            => await Ephemeral(DefaultConnectionString, async o => await o.ExecuteAsync(sqlTextOrEmbeddedResource));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteAsync(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
@@ -553,7 +553,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         public async Task ExecuteAsync(string sqlTextOrEmbeddedResource, object param)
-            => await Ephemeral(DefaultConnectionString, async o => await o.ExecuteAsync(sqlTextOrEmbeddedResource, param));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteAsync(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result.
@@ -563,7 +563,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="defaultValue"></param>
         /// <returns></returns>
         public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
-            => await Ephemeral(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource)) ?? defaultValue;
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result.
@@ -574,7 +574,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="defaultValue"></param>
         /// <returns></returns>
         public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
-            => await Ephemeral(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param)) ?? defaultValue;
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result or throws an exception.
@@ -583,7 +583,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
         public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource)
-            => await Ephemeral(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource));
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result or throws an exception.
