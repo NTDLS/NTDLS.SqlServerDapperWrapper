@@ -17,9 +17,9 @@
     <PackageReleaseNotes>
       Added async passthroughs.
     </PackageReleaseNotes>
-    <Version>1.3.2</Version>
+    <Version>1.3.3</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageTags>sqlite;dapper;managed;simple;</PackageTags>
+    <PackageTags>sqlserver;dapper;managed;simple;</PackageTags>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
