@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 
 namespace NTDLS.SqlServerDapperWrapper
 {
@@ -33,6 +34,17 @@ namespace NTDLS.SqlServerDapperWrapper
         public delegate Task<T> EphemeralAsyncProc<T>(SqlServerManagedInstance connection);
 
         #region Constructors.
+
+        /// <summary>
+        /// Creates a new instance of ManagedDataStorageFactory.
+        /// </summary>
+        public SqlServerManagedFactory(IConfiguration configuration, string connectionStringName)
+        {
+            var connectionString = configuration.GetConnectionString(connectionStringName)
+                ?? throw new Exception($"Connection string '{connectionStringName}' not found in configuration.");
+
+            DefaultConnectionString = connectionString;
+        }
 
         /// <summary>
         /// Creates a new instance of ManagedDataStorageFactory.
@@ -190,7 +202,6 @@ namespace NTDLS.SqlServerDapperWrapper
             return await func(connection);
         }
 
-
         #endregion
 
         #region Query/Execute passthrough.
@@ -199,194 +210,194 @@ namespace NTDLS.SqlServerDapperWrapper
         /// Queries the database using the given script name or SQL text and returns the results.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public IEnumerable<T> Query<T>(string scriptName)
-            => Ephemeral(DefaultConnectionString, o => o.Query<T>(scriptName));
+        public IEnumerable<T> Query<T>(string sqlTextOrEmbeddedResource)
+            => Ephemeral(DefaultConnectionString, o => o.Query<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the results.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public IEnumerable<T> Query<T>(string scriptName, object param)
-            => Ephemeral(DefaultConnectionString, o => o.Query<T>(scriptName, param));
+        public IEnumerable<T> Query<T>(string sqlTextOrEmbeddedResource, object param)
+            => Ephemeral(DefaultConnectionString, o => o.Query<T>(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T QueryFirst<T>(string scriptName)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirst<T>(scriptName));
+        public T QueryFirst<T>(string sqlTextOrEmbeddedResource)
+            => Ephemeral(DefaultConnectionString, o => o.QueryFirst<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T QueryFirstOrDefault<T>(string scriptName, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(scriptName)) ?? defaultValue;
+        public T QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T QueryFirst<T>(string scriptName, object param)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirst<T>(scriptName, param));
+        public T QueryFirst<T>(string sqlTextOrEmbeddedResource, object param)
+            => Ephemeral(DefaultConnectionString, o => o.QueryFirst<T>(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T QueryFirstOrDefault<T>(string scriptName, object param, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(scriptName, param)) ?? defaultValue;
+        public T QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, param)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T QuerySingle<T>(string scriptName)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingle<T>(scriptName));
+        public T QuerySingle<T>(string sqlTextOrEmbeddedResource)
+            => Ephemeral(DefaultConnectionString, o => o.QuerySingle<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T QuerySingle<T>(string scriptName, object param)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingle<T>(scriptName, param));
+        public T QuerySingle<T>(string sqlTextOrEmbeddedResource, object param)
+            => Ephemeral(DefaultConnectionString, o => o.QuerySingle<T>(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T QuerySingleOrDefault<T>(string scriptName, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(scriptName, defaultValue));
+        public T QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, defaultValue));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T QuerySingleOrDefault<T>(string scriptName, object param, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(scriptName, param, defaultValue));
+        public T QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, param, defaultValue));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T? QuerySingleOrDefault<T>(string scriptName)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(scriptName));
+        public T? QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource)
+            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T? QuerySingleOrDefault<T>(string scriptName, object param)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(scriptName, param));
+        public T? QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, object param)
+            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, param));
 
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T? QueryFirstOrDefault<T>(string scriptName)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(scriptName));
+        public T? QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource)
+            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T? QueryFirstOrDefault<T>(string scriptName, object param)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(scriptName, param));
+        public T? QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, object param)
+            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
         /// </summary>
-        /// <param name="scriptName"></param>
-        public void Execute(string scriptName)
-            => Ephemeral(DefaultConnectionString, o => o.Execute(scriptName));
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        public void Execute(string sqlTextOrEmbeddedResource)
+            => Ephemeral(DefaultConnectionString, o => o.Execute(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
         /// </summary>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
-        public void Execute(string scriptName, object param)
-            => Ephemeral(DefaultConnectionString, o => o.Execute(scriptName, param));
+        public void Execute(string sqlTextOrEmbeddedResource, object param)
+            => Ephemeral(DefaultConnectionString, o => o.Execute(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T ExecuteScalar<T>(string scriptName, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(scriptName)) ?? defaultValue;
+        public T ExecuteScalar<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(sqlTextOrEmbeddedResource)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T ExecuteScalar<T>(string scriptName, object param, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(scriptName, param)) ?? defaultValue;
+        public T ExecuteScalar<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(sqlTextOrEmbeddedResource, param)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T? ExecuteScalar<T>(string scriptName)
-            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(scriptName));
+        public T? ExecuteScalar<T>(string sqlTextOrEmbeddedResource)
+            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T? ExecuteScalar<T>(string scriptName, object param)
-            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(scriptName, param));
+        public T? ExecuteScalar<T>(string sqlTextOrEmbeddedResource, object param)
+            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(sqlTextOrEmbeddedResource, param));
 
         #endregion
 
@@ -396,194 +407,193 @@ namespace NTDLS.SqlServerDapperWrapper
         /// Queries the database using the given script name or SQL text and returns the results.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public IEnumerable<T> QueryAsync<T>(string scriptName)
-            => Ephemeral(DefaultConnectionString, o => o.Query<T>(scriptName));
+        public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource)
+            => await Ephemeral(DefaultConnectionString, async o => await o.QueryAsync<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the results.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public IEnumerable<T> QueryAsync<T>(string scriptName, object param)
-            => Ephemeral(DefaultConnectionString, o => o.Query<T>(scriptName, param));
+        public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource, object param)
+            => await Ephemeral(DefaultConnectionString, async o => await o.QueryAsync<T>(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T QueryFirstAsync<T>(string scriptName)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirst<T>(scriptName));
+        public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource)
+            => await Ephemeral(DefaultConnectionString, async o => await o.QueryFirstAsync<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T QueryFirstOrDefaultAsync<T>(string scriptName, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(scriptName)) ?? defaultValue;
+        public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+            => await Ephemeral(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T QueryFirstAsync<T>(string scriptName, object param)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirst<T>(scriptName, param));
+        public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource, object param)
+            => await Ephemeral(DefaultConnectionString, async o => await o.QueryFirstAsync<T>(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T QueryFirstOrDefaultAsync<T>(string scriptName, object param, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(scriptName, param)) ?? defaultValue;
+        public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+            => await Ephemeral(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T QuerySingleAsync<T>(string scriptName)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingle<T>(scriptName));
+        public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource)
+            => await Ephemeral(DefaultConnectionString, async o => await o.QuerySingleAsync<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T QuerySingleAsync<T>(string scriptName, object param)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingle<T>(scriptName, param));
+        public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource, object param)
+            => await Ephemeral(DefaultConnectionString, async o => await o.QuerySingleAsync<T>(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T QuerySingleOrDefaultAsync<T>(string scriptName, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(scriptName, defaultValue));
+        public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+            => await Ephemeral(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, defaultValue));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T QuerySingleOrDefaultAsync<T>(string scriptName, object param, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(scriptName, param, defaultValue));
+        public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+            => await Ephemeral(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, defaultValue));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T? QuerySingleOrDefaultAsync<T>(string scriptName)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(scriptName));
+        public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource)
+            => await Ephemeral(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T? QuerySingleOrDefaultAsync<T>(string scriptName, object param)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(scriptName, param));
-
+        public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param)
+            => await Ephemeral(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T? QueryFirstOrDefaultAsync<T>(string scriptName)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(scriptName));
+        public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource)
+            => await Ephemeral(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T? QueryFirstOrDefaultAsync<T>(string scriptName, object param)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(scriptName, param));
+        public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param)
+            => await Ephemeral(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
         /// </summary>
-        /// <param name="scriptName"></param>
-        public void ExecuteAsync(string scriptName)
-            => Ephemeral(DefaultConnectionString, o => o.Execute(scriptName));
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        public async Task ExecuteAsync(string sqlTextOrEmbeddedResource)
+            => await Ephemeral(DefaultConnectionString, async o => await o.ExecuteAsync(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
         /// </summary>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
-        public void ExecuteAsync(string scriptName, object param)
-            => Ephemeral(DefaultConnectionString, o => o.Execute(scriptName, param));
+        public async Task ExecuteAsync(string sqlTextOrEmbeddedResource, object param)
+            => await Ephemeral(DefaultConnectionString, async o => await o.ExecuteAsync(sqlTextOrEmbeddedResource, param));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T ExecuteScalarAsync<T>(string scriptName, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(scriptName)) ?? defaultValue;
+        public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+            => await Ephemeral(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T ExecuteScalarAsync<T>(string scriptName, object param, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(scriptName, param)) ?? defaultValue;
+        public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+            => await Ephemeral(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T? ExecuteScalarAsync<T>(string scriptName)
-            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(scriptName));
+        public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource)
+            => await Ephemeral(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="scriptName"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T? ExecuteScalarAsync<T>(string scriptName, object param)
-            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(scriptName, param));
+        public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param));
 
         #endregion  
     }

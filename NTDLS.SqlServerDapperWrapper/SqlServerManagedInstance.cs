@@ -1,8 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using System.Reflection;
-using System.Runtime.Caching;
 using System.Text.RegularExpressions;
 
 namespace NTDLS.SqlServerDapperWrapper
@@ -13,7 +11,9 @@ namespace NTDLS.SqlServerDapperWrapper
     /// </summary>
     public class SqlServerManagedInstance : IDisposable
     {
-        private static readonly MemoryCache _cache = new("ManagedDataStorageInstance");
+        /// <summary>
+        /// Be a single word (no spaces or punctuation) or a bracketed expression like [name].
+        /// </summary>
         private static readonly Regex _isProcedureNameRegex = new(@"^(\[.*\]|\w+)$", RegexOptions.IgnoreCase);
         private SqlTransaction? _transaction;
         private bool _disposed = false;
@@ -172,85 +172,6 @@ namespace NTDLS.SqlServerDapperWrapper
             return _transaction;
         }
 
-        /// <summary>
-        /// Returns the given text, or if the script ends with ".sql", the script will be
-        /// located and loaded form the executing assembly (assuming it is an embedded resource).
-        /// </summary>
-        public static string TranslateSqlScript(string scriptNameOrText)
-        {
-            string cacheKey = $":{scriptNameOrText.ToLowerInvariant()}".Replace('.', ':').Replace('\\', ':').Replace('/', ':');
-
-            if (cacheKey.EndsWith(":sql", StringComparison.InvariantCultureIgnoreCase))
-            {
-                if (_cache.Get(cacheKey) is string cachedScriptText)
-                {
-                    return cachedScriptText;
-                }
-
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-                foreach (var assembly in assemblies)
-                {
-                    var scriptText = SearchAssembly(assembly, cacheKey);
-                    if (scriptText != null)
-                    {
-                        return scriptText;
-                    }
-                }
-
-                throw new Exception($"The embedded script resource could not be found after enumeration: '{scriptNameOrText}'");
-            }
-
-            return scriptNameOrText;
-        }
-
-        /// <summary>
-        /// Searches the given assembly for a script file.
-        /// </summary>
-        private static string? SearchAssembly(Assembly assembly, string scriptName)
-        {
-            string cacheKey = scriptName;
-
-            var allScriptNames = _cache.Get($"TranslateSqlScript:SearchAssembly:{assembly.FullName}") as List<string>;
-            if (allScriptNames == null)
-            {
-                allScriptNames = assembly.GetManifestResourceNames().Where(o => o.EndsWith(".sql", StringComparison.InvariantCultureIgnoreCase))
-                    .Select(o => $":{o}".Replace('.', ':')).ToList();
-                _cache.Add("TranslateSqlScript:Names", allScriptNames, new CacheItemPolicy
-                {
-                    SlidingExpiration = new TimeSpan(1, 0, 0)
-                });
-            }
-
-            if (allScriptNames.Count > 0)
-            {
-                var script = allScriptNames.Where(o => o.EndsWith(cacheKey, StringComparison.InvariantCultureIgnoreCase)).ToList();
-                if (script.Count > 1)
-                {
-                    throw new Exception($"The script name is ambiguous: {cacheKey}.");
-                }
-                else if (script == null || script.Count == 0)
-                {
-                    return null;
-                }
-
-                using var stream = assembly.GetManifestResourceStream(script.Single().Replace(':', '.').Trim(new char[] { '.' }))
-                    ?? throw new InvalidOperationException("Script not found: " + cacheKey);
-
-                using var reader = new StreamReader(stream);
-                var scriptText = reader.ReadToEnd();
-
-                _cache.Add(cacheKey, allScriptNames, new CacheItemPolicy
-                {
-                    SlidingExpiration = new TimeSpan(1, 0, 0)
-                });
-
-                return scriptText;
-            }
-
-            return null;
-        }
-
         #region Query/Execute passthrough.
 
         /// <summary>
@@ -261,7 +182,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public IEnumerable<T> Query<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.Query<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -274,7 +195,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public IEnumerable<T> Query<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.Query<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -287,7 +208,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T ExecuteScalar<T>(string sqlTextOrEmbeddedResource, T defaultValue)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.ExecuteScalar<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
@@ -301,7 +222,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T ExecuteScalar<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.ExecuteScalar<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
@@ -313,7 +234,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T QueryFirst<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.QueryFirst<T>(sqlTextOrEmbeddedResource);
         }
 
@@ -326,7 +247,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T QueryFirst<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.QueryFirst<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -339,7 +260,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, T defaultValue)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
@@ -353,7 +274,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
@@ -365,7 +286,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T QuerySingle<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.QuerySingle<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -378,7 +299,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T QuerySingle<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.QuerySingle<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -391,7 +312,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, T defaultValue)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
@@ -405,7 +326,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
@@ -417,7 +338,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T? ExecuteScalar<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.ExecuteScalar<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -430,7 +351,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T? ExecuteScalar<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.ExecuteScalar<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -442,7 +363,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T? QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -455,7 +376,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T? QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -467,7 +388,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T? QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -480,7 +401,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public T? QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return NativeConnection.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -490,7 +411,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         public void Execute(string sqlTextOrEmbeddedResource)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             NativeConnection.Execute(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -501,7 +422,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="param"></param>
         public void Execute(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             NativeConnection.Execute(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -517,7 +438,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.QueryAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -530,7 +451,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.QueryAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -543,7 +464,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
@@ -557,7 +478,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
@@ -569,7 +490,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.QueryFirstAsync<T>(sqlTextOrEmbeddedResource);
         }
 
@@ -582,7 +503,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.QueryFirstAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -595,7 +516,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
@@ -609,7 +530,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
@@ -621,7 +542,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.QuerySingleAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -634,7 +555,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.QuerySingleAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -647,7 +568,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
@@ -661,7 +582,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
@@ -673,7 +594,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -686,7 +607,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -698,7 +619,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -711,7 +632,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -723,7 +644,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -736,7 +657,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <returns></returns>
         public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             return await NativeConnection.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -746,7 +667,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         public async Task ExecuteAsync(string sqlTextOrEmbeddedResource)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             await NativeConnection.ExecuteAsync(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
@@ -757,7 +678,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="param"></param>
         public async Task ExecuteAsync(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
             await NativeConnection.ExecuteAsync(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
