@@ -118,9 +118,9 @@ namespace NTDLS.SqlServerDapperWrapper
             GC.SuppressFinalize(this);
         }
 
-        private CommandType GetCommandType(string sqlText)
+        private CommandType GetCommandType(string sqlTextOrEmbeddedResource)
         {
-            if (_isProcedureNameRegex.IsMatch(sqlText.Trim()))
+            if (_isProcedureNameRegex.IsMatch(sqlTextOrEmbeddedResource.Trim()))
             {
                 return CommandType.StoredProcedure;
             }
@@ -257,252 +257,508 @@ namespace NTDLS.SqlServerDapperWrapper
         /// Queries the database using the given script name or SQL text and returns the results.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public IEnumerable<T> Query<T>(string sqlText)
+        public IEnumerable<T> Query<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.Query<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.Query<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the results.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public IEnumerable<T> Query<T>(string sqlText, object param)
+        public IEnumerable<T> Query<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.Query<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.Query<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T ExecuteScalar<T>(string sqlText, T defaultValue)
+        public T ExecuteScalar<T>(string sqlTextOrEmbeddedResource, T defaultValue)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.ExecuteScalar<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.ExecuteScalar<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T ExecuteScalar<T>(string sqlText, object param, T defaultValue)
+        public T ExecuteScalar<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.ExecuteScalar<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.ExecuteScalar<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T QueryFirst<T>(string sqlText)
+        public T QueryFirst<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.QueryFirst<T>(sqlText);
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.QueryFirst<T>(sqlTextOrEmbeddedResource);
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T QueryFirst<T>(string sqlText, object param)
+        public T QueryFirst<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.QueryFirst<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.QueryFirst<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T QueryFirstOrDefault<T>(string sqlText, T defaultValue)
+        public T QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, T defaultValue)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.QueryFirstOrDefault<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T QueryFirstOrDefault<T>(string sqlText, object param, T defaultValue)
+        public T QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.QueryFirstOrDefault<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T QuerySingle<T>(string sqlText)
+        public T QuerySingle<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.QuerySingle<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.QuerySingle<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T QuerySingle<T>(string sqlText, object param)
+        public T QuerySingle<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.QuerySingle<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.QuerySingle<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T QuerySingleOrDefault<T>(string sqlText, T defaultValue)
+        public T QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, T defaultValue)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.QuerySingleOrDefault<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public T QuerySingleOrDefault<T>(string sqlText, object param, T defaultValue)
+        public T QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.QuerySingleOrDefault<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction()) ?? defaultValue;
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
         }
 
         /// <summary>
         /// /// Queries the database using the given script name or SQL text and returns a scalar value throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T? ExecuteScalar<T>(string sqlText)
+        public T? ExecuteScalar<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.ExecuteScalar<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.ExecuteScalar<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
         /// <summary>
         /// /// Queries the database using the given script name or SQL text and returns a scalar value throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T? ExecuteScalar<T>(string sqlText, object param)
+        public T? ExecuteScalar<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.ExecuteScalar<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.ExecuteScalar<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T? QueryFirstOrDefault<T>(string sqlText)
+        public T? QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.QueryFirstOrDefault<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T? QueryFirstOrDefault<T>(string sqlText, object param)
+        public T? QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.QueryFirstOrDefault<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public T? QuerySingleOrDefault<T>(string sqlText)
+        public T? QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.QuerySingleOrDefault<T>(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public T? QuerySingleOrDefault<T>(string sqlText, object param)
+        public T? QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            return NativeConnection.QuerySingleOrDefault<T>(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return NativeConnection.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
         /// </summary>
-        /// <param name="sqlText"></param>
-        public void Execute(string sqlText)
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        public void Execute(string sqlTextOrEmbeddedResource)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            NativeConnection.Execute(sqlText, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            NativeConnection.Execute(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
         /// </summary>
-        /// <param name="sqlText"></param>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
-        public void Execute(string sqlText, object param)
+        public void Execute(string sqlTextOrEmbeddedResource, object param)
         {
-            sqlText = TranslateSqlScript(sqlText);
-            NativeConnection.Execute(sqlText, param, commandType: GetCommandType(sqlText), transaction: GetCurrentTransaction());
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            NativeConnection.Execute(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        #endregion
+
+        #region Query/Execute passthrough (async).
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns the results.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QueryAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns the results.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QueryAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns the scalar result.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns the scalar result.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="param"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <returns></returns>
+        public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QueryFirstAsync<T>(sqlTextOrEmbeddedResource);
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QueryFirstAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns the first result or a default value.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns the first result or a default value.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="param"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <returns></returns>
+        public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QuerySingleAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QuerySingleAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns a single value or a default.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns a single value or a default.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="param"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction()) ?? defaultValue;
+        }
+
+        /// <summary>
+        /// /// Queries the database using the given script name or SQL text and returns a scalar value throws an exception.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <returns></returns>
+        public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        /// <summary>
+        /// /// Queries the database using the given script name or SQL text and returns a scalar value throws an exception.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns the first result or a default value.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <returns></returns>
+        public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns the first result or a default value.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns a single value or a default.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <returns></returns>
+        public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns a single value or a default.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        /// <summary>
+        /// Executes the given script name or SQL text on the database and does not return a result.
+        /// </summary>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        public async Task ExecuteAsync(string sqlTextOrEmbeddedResource)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            await NativeConnection.ExecuteAsync(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        /// <summary>
+        /// Executes the given script name or SQL text on the database and does not return a result.
+        /// </summary>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="param"></param>
+        public async Task ExecuteAsync(string sqlTextOrEmbeddedResource, object param)
+        {
+            sqlTextOrEmbeddedResource = TranslateSqlScript(sqlTextOrEmbeddedResource);
+            await NativeConnection.ExecuteAsync(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
         #endregion

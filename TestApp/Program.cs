@@ -1,5 +1,4 @@
 ﻿using NTDLS.SqlServerDapperWrapper;
-using System.Data.Common;
 
 namespace TestApp
 {
