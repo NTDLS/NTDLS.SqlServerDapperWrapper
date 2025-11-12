@@ -595,6 +595,29 @@ namespace NTDLS.SqlServerDapperWrapper
         public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param)
             => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param));
 
+        #endregion
+
+        #region Query/Execute passthrough (unbuffered).
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns the results.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <returns></returns>
+        public IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource)
+            => Ephemeral(DefaultConnectionString, o => o.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource));
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns the results.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource, object param)
+            => Ephemeral(DefaultConnectionString, o => o.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource, param));
+
         #endregion  
     }
 }

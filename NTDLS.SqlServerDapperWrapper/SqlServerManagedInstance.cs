@@ -683,5 +683,34 @@ namespace NTDLS.SqlServerDapperWrapper
         }
 
         #endregion
+
+        #region Query/Execute passthrough (unbuffered).
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns the results.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <returns></returns>
+        public IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource)
+        {
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
+            return NativeConnection.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns the results.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        {
+            sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
+            return NativeConnection.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource, param, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
+        }
+
+        #endregion
     }
 }
