@@ -6,7 +6,7 @@ namespace NTDLS.SqlServerDapperWrapper
     /// <summary>
     /// Used to read EmbeddedResources from assemblies.
     /// </summary>
-    internal static class EmbeddedResource
+    public static class EmbeddedResource
     {
         private static readonly MemoryCache _cache = new(new MemoryCacheOptions());
 
@@ -29,7 +29,7 @@ namespace NTDLS.SqlServerDapperWrapper
 
                 foreach (var assembly in assemblies)
                 {
-                    var scriptText = SearchAssembly(assembly, cacheKey);
+                    var scriptText = SearchAssembly(assembly, cacheKey, sqlTextOrEmbeddedResource);
                     if (scriptText != null)
                     {
                         return scriptText;
@@ -44,44 +44,42 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <summary>
         /// Searches the given assembly for a script file.
         /// </summary>
-        private static string? SearchAssembly(Assembly assembly, string scriptName)
+        private static string? SearchAssembly(Assembly assembly, string scriptCacheKey, string scriptName)
         {
-            var fileExtension = Path.GetExtension(scriptName);
+            var assemblyCacheKey = $"EmbeddedScripts:SearchAssembly:{assembly.FullName}";
 
-            string cacheKey = scriptName;
-
-            var allScriptNames = _cache.Get($"EmbeddedScripts:SearchAssembly:{assembly.FullName}") as List<string>;
+            var allScriptNames = _cache.Get(assemblyCacheKey) as List<string>;
             if (allScriptNames == null)
             {
-                allScriptNames = assembly.GetManifestResourceNames().Where(o => o.EndsWith(fileExtension, StringComparison.InvariantCultureIgnoreCase))
+                allScriptNames = assembly.GetManifestResourceNames().Where(o => o.EndsWith(".sql", StringComparison.InvariantCultureIgnoreCase))
                     .Select(o => $":{o}".Replace('.', ':')).ToList();
-                _cache.Set("EmbeddedScripts:Names", allScriptNames, new MemoryCacheEntryOptions
+                _cache.Set(assemblyCacheKey, allScriptNames, new MemoryCacheEntryOptions
                 {
-                    SlidingExpiration = new TimeSpan(1, 0, 0)
+                    SlidingExpiration = TimeSpan.FromHours(1)
                 });
             }
 
             if (allScriptNames.Count > 0)
             {
-                var script = allScriptNames.Where(o => o.EndsWith(cacheKey, StringComparison.InvariantCultureIgnoreCase)).ToList();
+                var script = allScriptNames.Where(o => o.EndsWith(scriptCacheKey, StringComparison.InvariantCultureIgnoreCase)).ToList();
                 if (script.Count > 1)
                 {
-                    throw new Exception($"Ambiguous script name: [{cacheKey}].");
+                    throw new Exception($"Ambiguous script name: [{scriptName}].");
                 }
-                else if (script == null || script.Count == 0)
+                else if (script.Count == 0)
                 {
                     return null;
                 }
 
                 using var stream = assembly.GetManifestResourceStream(script.Single().Replace(':', '.').Trim(new char[] { '.' }))
-                    ?? throw new InvalidOperationException($"Script not found: [{cacheKey}].");
+                    ?? throw new InvalidOperationException($"Script not found: [{scriptName}].");
 
                 using var reader = new StreamReader(stream);
                 var scriptText = reader.ReadToEnd();
 
-                _cache.Set(cacheKey, scriptText, new MemoryCacheEntryOptions
+                _cache.Set(scriptCacheKey, scriptText, new MemoryCacheEntryOptions
                 {
-                    SlidingExpiration = new TimeSpan(1, 0, 0)
+                    SlidingExpiration = TimeSpan.FromHours(1)
                 });
 
                 return scriptText;

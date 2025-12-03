@@ -15,9 +15,9 @@
     <RepositoryUrl>https://github.com/NTDLS/NTDLS.SqlServerDapperWrapper</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <PackageReleaseNotes>
-      Dependency updates and introduced .net 10 support.
+      Caching fixes and improvements to error messages.
     </PackageReleaseNotes>
-    <Version>1.4.1</Version>
+    <Version>1.4.2</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>sqlserver;dapper;managed;simple;</PackageTags>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

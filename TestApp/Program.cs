@@ -21,7 +21,11 @@ namespace TestApp
 
             //Test embedded resource script execution.
             var sqlValue = MyConnection.ExecuteScalar<DateTime>("TestSqlFile.sql");
-            Console.WriteLine($"sqlValue: {textValue}");
+            Console.WriteLine($"sqlValue: {sqlValue}");
+
+            //Test embedded resource script execution.
+            var sqlValue1 = MyConnection.ExecuteScalar<DateTime>("TestSqlFile.sql");
+            Console.WriteLine($"sqlValue: {sqlValue1}");
 
             //Each time a statement/query is executed, the NTDLS.SqlServerDapperWrapper will
             //  open a connection, execute then close & dispose the connection. 
