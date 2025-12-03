@@ -71,7 +71,7 @@ namespace NTDLS.SqlServerDapperWrapper
                     return null;
                 }
 
-                using var stream = assembly.GetManifestResourceStream(script.Single().Replace(':', '.').Trim(new char[] { '.' }))
+                using var stream = assembly.GetManifestResourceStream(script.Single().Replace(':', '.').Trim(['.']))
                     ?? throw new InvalidOperationException($"Script not found: [{scriptName}].");
 
                 using var reader = new StreamReader(stream);
