@@ -14,7 +14,9 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <summary>
         /// Be a single word (no spaces or punctuation) or a bracketed expression like [name].
         /// </summary>
-        private static readonly Regex _isProcedureNameRegex = new(@"^(\[.*\]|\w+)$", RegexOptions.IgnoreCase);
+        //private static readonly Regex _isProcedureNameRegex = new(@"^(\[.*\]|\w+)$", RegexOptions.IgnoreCase);
+        private static readonly Regex _isProcedureNameRegex = new(@"^(\[?\w+\]?)(\.(\[?\w+\]?))*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
         private SqlTransaction? _transaction;
         private bool _disposed = false;
 
@@ -103,7 +105,7 @@ namespace NTDLS.SqlServerDapperWrapper
                     }
                     finally
                     {
-                        NativeConnection.Close();
+                        NativeConnection.Dispose();
                     }
                 }
             }
@@ -491,7 +493,7 @@ namespace NTDLS.SqlServerDapperWrapper
         public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource)
         {
             sqlTextOrEmbeddedResource = EmbeddedResource.Load(sqlTextOrEmbeddedResource);
-            return await NativeConnection.QueryFirstAsync<T>(sqlTextOrEmbeddedResource);
+            return await NativeConnection.QueryFirstAsync<T>(sqlTextOrEmbeddedResource, commandType: GetCommandType(sqlTextOrEmbeddedResource), transaction: GetCurrentTransaction());
         }
 
         /// <summary>

@@ -605,8 +605,12 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <returns></returns>
-        public IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource)
-            => Ephemeral(DefaultConnectionString, o => o.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource));
+        public async IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource)
+        {
+            using var connection = new SqlServerManagedInstance(DefaultConnectionString);
+            await foreach (var row in connection.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource))
+                yield return row;
+        }
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the results.
@@ -615,9 +619,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource, object param)
-            => Ephemeral(DefaultConnectionString, o => o.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource, param));
+        public async IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        {
+            using var connection = new SqlServerManagedInstance(DefaultConnectionString);
+            await foreach (var row in connection.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource, param))
+                yield return row;
+        }
 
-        #endregion  
+        #endregion
     }
 }
