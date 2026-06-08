@@ -1,58 +1,59 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0;net10.0;</TargetFrameworks>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+	<PropertyGroup>
+		<TargetFrameworks>net8.0;net9.0;net10.0;</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
 
-    <Title>NTDLS.SqlServerDapperWrapper</Title>
-    <Authors>NetworkDLS</Authors>
-    <Nullable>Enable</Nullable>
-    <Company>NetworkDLS</Company>
-    <Description>Provides a simple interface to a SQL Server database with automatic cleanup and stored procedure detection.</Description>
-    <Copyright>Copyright © 2026 NetworkDLS</Copyright>
-    <PackageProjectUrl>https://github.com/NTDLS/NTDLS.SqlServerDapperWrapper</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/NTDLS/NTDLS.SqlServerDapperWrapper</RepositoryUrl>
-    <RepositoryType>Git</RepositoryType>
-    <PackageReleaseNotes>
-      Fixes to procedure detection and connection disposal.
-    </PackageReleaseNotes>
-    <Version>1.5.0</Version>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageTags>sqlserver;dapper;managed;simple;</PackageTags>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Title>NTDLS.SqlServerDapperWrapper</Title>
+		<Authors>NetworkDLS</Authors>
+		<Nullable>Enable</Nullable>
+		<Company>NetworkDLS</Company>
+		<Description>Provides a simple interface to a SQL Server database with automatic cleanup and stored procedure detection.</Description>
+		<Copyright>Copyright © 2026 NetworkDLS</Copyright>
+		<PackageProjectUrl>https://github.com/NTDLS/NTDLS.SqlServerDapperWrapper</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/NTDLS/NTDLS.SqlServerDapperWrapper</RepositoryUrl>
+		<RepositoryType>Git</RepositoryType>
+		<PackageReleaseNotes>
+			Moved resource loading to NTDLS.EmbeddedResource package. Added automatic command type detection based on input string format.
+		</PackageReleaseNotes>
+		<Version>1.5.1</Version>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageTags>sqlserver;dapper;managed;simple;</PackageTags>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <IncludeSymbols>True</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <PackageIcon>Logo.png</PackageIcon>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <OutputType>Library</OutputType>
-    <ApplicationIcon>Logo.ico</ApplicationIcon>
-  </PropertyGroup>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<PackageIcon>Logo.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<OutputType>Library</OutputType>
+		<ApplicationIcon>Logo.ico</ApplicationIcon>
+	</PropertyGroup>
 
-  <ItemGroup Condition=" '$(BuildingPackage)' == 'true' ">
-    <Content Include="Logo.png" />
-  </ItemGroup>
+	<ItemGroup Condition=" '$(BuildingPackage)' == 'true' ">
+		<Content Include="Logo.png" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="Logo.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="Logo.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.66" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.4" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Dapper" Version="2.1.79" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.8" />
+		<PackageReference Include="NTDLS.EmbeddedResource" Version="1.0.1" />
+	</ItemGroup>
 
 </Project>
