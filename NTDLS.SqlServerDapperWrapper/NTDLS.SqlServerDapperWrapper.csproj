@@ -17,7 +17,7 @@
 		<PackageReleaseNotes>
 			Automatic removal of BOM from UTF-8 encoded text.
 		</PackageReleaseNotes>
-		<Version>1.5.2</Version>
+		<Version>1.5.3</Version>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageTags>sqlserver;dapper;managed;simple;</PackageTags>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -53,7 +53,7 @@
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.9" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.9" />
-		<PackageReference Include="NTDLS.EmbeddedResource" Version="1.0.3" />
+		<PackageReference Include="NTDLS.EmbeddedResource" Version="1.0.4" />
 	</ItemGroup>
 
 </Project>
