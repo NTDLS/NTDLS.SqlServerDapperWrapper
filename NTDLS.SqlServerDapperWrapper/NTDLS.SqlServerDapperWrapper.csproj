@@ -15,9 +15,9 @@
 		<RepositoryUrl>https://github.com/NTDLS/NTDLS.SqlServerDapperWrapper</RepositoryUrl>
 		<RepositoryType>Git</RepositoryType>
 		<PackageReleaseNotes>
-			Moved resource loading to NTDLS.EmbeddedResource package. Added automatic command type detection based on input string format.
+			Automatic removal of BOM from UTF-8 encoded text.
 		</PackageReleaseNotes>
-		<Version>1.5.1</Version>
+		<Version>1.5.2</Version>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageTags>sqlserver;dapper;managed;simple;</PackageTags>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -50,10 +50,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="Dapper" Version="2.1.79" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.8" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.8" />
-		<PackageReference Include="NTDLS.EmbeddedResource" Version="1.0.1" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.9" />
+		<PackageReference Include="NTDLS.EmbeddedResource" Version="1.0.3" />
 	</ItemGroup>
 
 </Project>
