@@ -59,7 +59,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <summary>
         /// Creates a new instance of ManagedDataStorageInstance.
         /// </summary>
-        public SqlServerManagedInstance(string serverName, string databaseName, string username, string password)
+        public SqlServerManagedInstance(string serverName, string databaseName, string username, string password, int? commandTimeout = null)
         {
             var connectionString = new SqlConnectionStringBuilder()
             {
@@ -68,7 +68,8 @@ namespace NTDLS.SqlServerDapperWrapper
                 TrustServerCertificate = true,
                 IntegratedSecurity = false,
                 UserID = username,
-                Password = password
+                Password = password,
+                ConnectTimeout = commandTimeout ?? 30,
             }.ToString();
 
             NativeConnection = new SqlConnection(connectionString);
@@ -114,8 +115,6 @@ namespace NTDLS.SqlServerDapperWrapper
             GC.SuppressFinalize(this);
         }
 
-
-
         /// <summary>
         /// Returns the currently active transaction, if any.
         /// </summary>
@@ -132,7 +131,6 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <summary>
         /// Begins an atomic transaction.
         /// </summary>
-        /// <returns></returns>
         public SqlTransaction BeginTransaction()
         {
             if (_transaction != null)
@@ -148,7 +146,6 @@ namespace NTDLS.SqlServerDapperWrapper
         /// Begins an atomic transaction.
         /// </summary>
         /// <param name="isolationLevel"></param>
-        /// <returns></returns>
         public SqlTransaction BeginTransaction(IsolationLevel isolationLevel)
         {
             if (_transaction != null)
@@ -167,11 +164,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public IEnumerable<T> Query<T>(string sqlTextOrEmbeddedResource)
+        public IEnumerable<T> Query<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return NativeConnection.Query<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction());
+            return NativeConnection.Query<T>(sqlTextOrEmbeddedResource, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -180,11 +179,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public IEnumerable<T> Query<T>(string sqlTextOrEmbeddedResource, object param)
+        public IEnumerable<T> Query<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return NativeConnection.Query<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            return NativeConnection.Query<T>(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -193,8 +194,9 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T ExecuteScalar<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+        public T ExecuteScalar<T>(string sqlTextOrEmbeddedResource, T defaultValue, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
             return NativeConnection.ExecuteScalar<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction()) ?? defaultValue;
@@ -207,8 +209,9 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T ExecuteScalar<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+        public T ExecuteScalar<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
             return NativeConnection.ExecuteScalar<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction()) ?? defaultValue;
@@ -219,8 +222,9 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QueryFirst<T>(string sqlTextOrEmbeddedResource)
+        public T QueryFirst<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
             return NativeConnection.QueryFirst<T>(sqlTextOrEmbeddedResource);
@@ -232,11 +236,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QueryFirst<T>(string sqlTextOrEmbeddedResource, object param)
+        public T QueryFirst<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return NativeConnection.QueryFirst<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            return NativeConnection.QueryFirst<T>(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -245,8 +251,9 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+        public T QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, T defaultValue, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
             return NativeConnection.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction()) ?? defaultValue;
@@ -259,8 +266,9 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+        public T QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
             return NativeConnection.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction()) ?? defaultValue;
@@ -271,11 +279,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QuerySingle<T>(string sqlTextOrEmbeddedResource)
+        public T QuerySingle<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return NativeConnection.QuerySingle<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction());
+            return NativeConnection.QuerySingle<T>(sqlTextOrEmbeddedResource, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -284,11 +294,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QuerySingle<T>(string sqlTextOrEmbeddedResource, object param)
+        public T QuerySingle<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return NativeConnection.QuerySingle<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            return NativeConnection.QuerySingle<T>(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -297,8 +309,9 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+        public T QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, T defaultValue, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
             return NativeConnection.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction()) ?? defaultValue;
@@ -311,8 +324,9 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+        public T QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
             return NativeConnection.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction()) ?? defaultValue;
@@ -323,11 +337,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T? ExecuteScalar<T>(string sqlTextOrEmbeddedResource)
+        public T? ExecuteScalar<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return NativeConnection.ExecuteScalar<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction());
+            return NativeConnection.ExecuteScalar<T>(sqlTextOrEmbeddedResource, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -336,11 +352,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T? ExecuteScalar<T>(string sqlTextOrEmbeddedResource, object param)
+        public T? ExecuteScalar<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return NativeConnection.ExecuteScalar<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            return NativeConnection.ExecuteScalar<T>(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -348,11 +366,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T? QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource)
+        public T? QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return NativeConnection.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction());
+            return NativeConnection.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -361,11 +381,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T? QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, object param)
+        public T? QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return NativeConnection.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            return NativeConnection.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -373,11 +395,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T? QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource)
+        public T? QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return NativeConnection.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction());
+            return NativeConnection.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -386,21 +410,26 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T? QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, object param)
+        public T? QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return NativeConnection.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            return NativeConnection.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
         /// </summary>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
-        public void Execute(string sqlTextOrEmbeddedResource)
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
+        /// <returns></returns>
+        public void Execute(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            NativeConnection.Execute(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction());
+            NativeConnection.Execute(sqlTextOrEmbeddedResource, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -408,10 +437,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
-        public void Execute(string sqlTextOrEmbeddedResource, object param)
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
+        /// <returns></returns>
+        public void Execute(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            NativeConnection.Execute(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            NativeConnection.Execute(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         #endregion
@@ -423,11 +455,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource)
+        public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return await NativeConnection.QueryAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction());
+            return await NativeConnection.QueryAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -436,11 +470,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return await NativeConnection.QueryAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            return await NativeConnection.QueryAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -449,8 +485,9 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+        public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
             return await NativeConnection.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction()) ?? defaultValue;
@@ -463,8 +500,9 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+        public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
             return await NativeConnection.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction()) ?? defaultValue;
@@ -475,11 +513,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource)
+        public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return await NativeConnection.QueryFirstAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction());
+            return await NativeConnection.QueryFirstAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -488,11 +528,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return await NativeConnection.QueryFirstAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            return await NativeConnection.QueryFirstAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -501,8 +543,9 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+        public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
             return await NativeConnection.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction()) ?? defaultValue;
@@ -515,8 +558,9 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+        public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
             return await NativeConnection.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction()) ?? defaultValue;
@@ -527,11 +571,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource)
+        public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return await NativeConnection.QuerySingleAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction());
+            return await NativeConnection.QuerySingleAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -540,11 +586,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return await NativeConnection.QuerySingleAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            return await NativeConnection.QuerySingleAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -553,8 +601,9 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
+        public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
             return await NativeConnection.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction()) ?? defaultValue;
@@ -567,8 +616,9 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
+        public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
             return await NativeConnection.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction()) ?? defaultValue;
@@ -579,11 +629,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource)
+        public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return await NativeConnection.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction());
+            return await NativeConnection.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -592,11 +644,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return await NativeConnection.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            return await NativeConnection.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -604,11 +658,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource)
+        public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return await NativeConnection.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction());
+            return await NativeConnection.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -617,11 +673,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return await NativeConnection.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            return await NativeConnection.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -629,11 +687,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource)
+        public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return await NativeConnection.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction());
+            return await NativeConnection.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -642,21 +702,26 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return await NativeConnection.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            return await NativeConnection.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
         /// </summary>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
-        public async Task ExecuteAsync(string sqlTextOrEmbeddedResource)
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
+        /// <returns></returns>
+        public async Task ExecuteAsync(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            await NativeConnection.ExecuteAsync(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction());
+            await NativeConnection.ExecuteAsync(sqlTextOrEmbeddedResource, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -664,10 +729,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
-        public async Task ExecuteAsync(string sqlTextOrEmbeddedResource, object param)
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
+        /// <returns></returns>
+        public async Task ExecuteAsync(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            await NativeConnection.ExecuteAsync(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            await NativeConnection.ExecuteAsync(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         #endregion
@@ -679,11 +747,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource)
+        public IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return NativeConnection.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType, transaction: GetCurrentTransaction());
+            return NativeConnection.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -692,11 +762,13 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        public IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             sqlTextOrEmbeddedResource = SqlScriptLoader.LoadSqlScript(sqlTextOrEmbeddedResource, out var commandType);
-            return NativeConnection.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType, transaction: GetCurrentTransaction());
+            return NativeConnection.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource, param, commandType: commandType,
+                transaction: GetCurrentTransaction(), commandTimeout: commandTimeout);
         }
 
         #endregion

@@ -72,7 +72,7 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <summary>
         /// Creates a new instance of ManagedDataStorageFactory.
         /// </summary>
-        public SqlServerManagedFactory(string serverName, string databaseName, string username, string password)
+        public SqlServerManagedFactory(string serverName, string databaseName, string username, string password, int? commandTimeout = null)
         {
             DefaultConnectionString = new SqlConnectionStringBuilder()
             {
@@ -81,7 +81,8 @@ namespace NTDLS.SqlServerDapperWrapper
                 TrustServerCertificate = true,
                 IntegratedSecurity = false,
                 UserID = username,
-                Password = password
+                Password = password,
+                CommandTimeout = commandTimeout ?? 30
             }.ToString();
         }
 
@@ -211,9 +212,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public IEnumerable<T> Query<T>(string sqlTextOrEmbeddedResource)
-            => Ephemeral(DefaultConnectionString, o => o.Query<T>(sqlTextOrEmbeddedResource));
+        public IEnumerable<T> Query<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.Query<T>(sqlTextOrEmbeddedResource, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the results.
@@ -221,18 +223,20 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public IEnumerable<T> Query<T>(string sqlTextOrEmbeddedResource, object param)
-            => Ephemeral(DefaultConnectionString, o => o.Query<T>(sqlTextOrEmbeddedResource, param));
+        public IEnumerable<T> Query<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.Query<T>(sqlTextOrEmbeddedResource, param, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QueryFirst<T>(string sqlTextOrEmbeddedResource)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirst<T>(sqlTextOrEmbeddedResource));
+        public T QueryFirst<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.QueryFirst<T>(sqlTextOrEmbeddedResource, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
@@ -240,9 +244,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource)) ?? defaultValue;
+        public T QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, T defaultValue, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, commandTimeout)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
@@ -250,9 +255,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QueryFirst<T>(string sqlTextOrEmbeddedResource, object param)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirst<T>(sqlTextOrEmbeddedResource, param));
+        public T QueryFirst<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.QueryFirst<T>(sqlTextOrEmbeddedResource, param, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
@@ -261,18 +267,20 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, param)) ?? defaultValue;
+        public T QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, param, commandTimeout)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QuerySingle<T>(string sqlTextOrEmbeddedResource)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingle<T>(sqlTextOrEmbeddedResource));
+        public T QuerySingle<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.QuerySingle<T>(sqlTextOrEmbeddedResource, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
@@ -280,9 +288,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QuerySingle<T>(string sqlTextOrEmbeddedResource, object param)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingle<T>(sqlTextOrEmbeddedResource, param));
+        public T QuerySingle<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.QuerySingle<T>(sqlTextOrEmbeddedResource, param, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -290,9 +299,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, defaultValue));
+        public T QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, T defaultValue, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, defaultValue, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -301,38 +311,20 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, param, defaultValue));
+        public T QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, param, defaultValue, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T? QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource));
-
-        /// <summary>
-        /// Queries the database using the given script name or SQL text and returns a single value or a default.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
-        /// <param name="param"></param>
-        /// <returns></returns>
-        public T? QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, object param)
-            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, param));
-
-
-        /// <summary>
-        /// Queries the database using the given script name or SQL text and returns a single value or a default.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
-        /// <returns></returns>
-        public T? QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource));
+        public T? QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -340,24 +332,51 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T? QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, object param)
-            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, param));
+        public T? QuerySingleOrDefault<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.QuerySingleOrDefault<T>(sqlTextOrEmbeddedResource, param, commandTimeout));
+
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns a single value or a default.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
+        /// <returns></returns>
+        public T? QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, commandTimeout));
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns a single value or a default.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
+        /// <returns></returns>
+        public T? QueryFirstOrDefault<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.QueryFirstOrDefault<T>(sqlTextOrEmbeddedResource, param, commandTimeout));
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
         /// </summary>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
-        public void Execute(string sqlTextOrEmbeddedResource)
-            => Ephemeral(DefaultConnectionString, o => o.Execute(sqlTextOrEmbeddedResource));
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
+        /// <returns></returns>
+        public void Execute(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.Execute(sqlTextOrEmbeddedResource, commandTimeout));
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
         /// </summary>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
-        public void Execute(string sqlTextOrEmbeddedResource, object param)
-            => Ephemeral(DefaultConnectionString, o => o.Execute(sqlTextOrEmbeddedResource, param));
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
+        /// <returns></returns>
+        public void Execute(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.Execute(sqlTextOrEmbeddedResource, param, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result.
@@ -365,9 +384,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T ExecuteScalar<T>(string sqlTextOrEmbeddedResource, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(sqlTextOrEmbeddedResource)) ?? defaultValue;
+        public T ExecuteScalar<T>(string sqlTextOrEmbeddedResource, T defaultValue, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(sqlTextOrEmbeddedResource, commandTimeout)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result.
@@ -376,18 +396,20 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T ExecuteScalar<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
-            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(sqlTextOrEmbeddedResource, param)) ?? defaultValue;
+        public T ExecuteScalar<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(sqlTextOrEmbeddedResource, param, commandTimeout)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T? ExecuteScalar<T>(string sqlTextOrEmbeddedResource)
-            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(sqlTextOrEmbeddedResource));
+        public T? ExecuteScalar<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(sqlTextOrEmbeddedResource, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result or throws an exception.
@@ -395,9 +417,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public T? ExecuteScalar<T>(string sqlTextOrEmbeddedResource, object param)
-            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(sqlTextOrEmbeddedResource, param));
+        public T? ExecuteScalar<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
+            => Ephemeral(DefaultConnectionString, o => o.ExecuteScalar<T>(sqlTextOrEmbeddedResource, param, commandTimeout));
 
         #endregion
 
@@ -408,9 +431,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryAsync<T>(sqlTextOrEmbeddedResource));
+        public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryAsync<T>(sqlTextOrEmbeddedResource, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the results.
@@ -418,18 +442,20 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource, object param)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryAsync<T>(sqlTextOrEmbeddedResource, param));
+        public async Task<IEnumerable<T>> QueryAsync<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryAsync<T>(sqlTextOrEmbeddedResource, param, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstAsync<T>(sqlTextOrEmbeddedResource));
+        public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstAsync<T>(sqlTextOrEmbeddedResource, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
@@ -437,9 +463,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource)) ?? defaultValue;
+        public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandTimeout)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or throws an exception.
@@ -447,9 +474,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource, object param)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstAsync<T>(sqlTextOrEmbeddedResource, param));
+        public async Task<T> QueryFirstAsync<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstAsync<T>(sqlTextOrEmbeddedResource, param, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the first result or a default value.
@@ -458,18 +486,20 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param)) ?? defaultValue;
+        public async Task<T> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandTimeout)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleAsync<T>(sqlTextOrEmbeddedResource));
+        public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleAsync<T>(sqlTextOrEmbeddedResource, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or throws an exception.
@@ -477,9 +507,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource, object param)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleAsync<T>(sqlTextOrEmbeddedResource, param));
+        public async Task<T> QuerySingleAsync<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleAsync<T>(sqlTextOrEmbeddedResource, param, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -487,9 +518,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, defaultValue));
+        public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, defaultValue, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -498,37 +530,20 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, defaultValue));
+        public async Task<T> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, defaultValue, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource));
-
-        /// <summary>
-        /// Queries the database using the given script name or SQL text and returns a single value or a default.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
-        /// <param name="param"></param>
-        /// <returns></returns>
-        public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param));
-
-        /// <summary>
-        /// Queries the database using the given script name or SQL text and returns a single value or a default.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
-        /// <returns></returns>
-        public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource));
+        public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns a single value or a default.
@@ -536,24 +551,50 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param));
+        public async Task<T?> QuerySingleOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QuerySingleOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandTimeout));
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns a single value or a default.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
+        /// <returns></returns>
+        public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, commandTimeout));
+
+        /// <summary>
+        /// Queries the database using the given script name or SQL text and returns a single value or a default.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
+        /// <returns></returns>
+        public async Task<T?> QueryFirstOrDefaultAsync<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.QueryFirstOrDefaultAsync<T>(sqlTextOrEmbeddedResource, param, commandTimeout));
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
         /// </summary>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
-        public async Task ExecuteAsync(string sqlTextOrEmbeddedResource)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteAsync(sqlTextOrEmbeddedResource));
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
+        /// <returns></returns>
+        public async Task ExecuteAsync(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteAsync(sqlTextOrEmbeddedResource, commandTimeout));
 
         /// <summary>
         /// Executes the given script name or SQL text on the database and does not return a result.
         /// </summary>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
-        public async Task ExecuteAsync(string sqlTextOrEmbeddedResource, object param)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteAsync(sqlTextOrEmbeddedResource, param));
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
+        /// <returns></returns>
+        public async Task ExecuteAsync(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteAsync(sqlTextOrEmbeddedResource, param, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result.
@@ -561,9 +602,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource)) ?? defaultValue;
+        public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, T defaultValue, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, commandTimeout)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result.
@@ -572,18 +614,20 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
         /// <param name="defaultValue"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param)) ?? defaultValue;
+        public async Task<T> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param, T defaultValue, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param, commandTimeout)) ?? defaultValue;
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result or throws an exception.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource));
+        public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, commandTimeout));
 
         /// <summary>
         /// Queries the database using the given script name or SQL text and returns the scalar result or throws an exception.
@@ -591,9 +635,10 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param)
-            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param));
+        public async Task<T?> ExecuteScalarAsync<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
+            => await EphemeralAsync(DefaultConnectionString, async o => await o.ExecuteScalarAsync<T>(sqlTextOrEmbeddedResource, param, commandTimeout));
 
         #endregion
 
@@ -604,11 +649,12 @@ namespace NTDLS.SqlServerDapperWrapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource)
+        public async IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource, int? commandTimeout = null)
         {
             using var connection = new SqlServerManagedInstance(DefaultConnectionString);
-            await foreach (var row in connection.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource))
+            await foreach (var row in connection.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource, commandTimeout))
                 yield return row;
         }
 
@@ -618,11 +664,12 @@ namespace NTDLS.SqlServerDapperWrapper
         /// <typeparam name="T"></typeparam>
         /// <param name="sqlTextOrEmbeddedResource">tSQL text oe the name and path of an embedded resource file.</param>
         /// <param name="param"></param>
+        /// <param name="commandTimeout" optional="true">The command timeout in seconds.</param>
         /// <returns></returns>
-        public async IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource, object param)
+        public async IAsyncEnumerable<T> QueryUnbufferedAsync<T>(string sqlTextOrEmbeddedResource, object param, int? commandTimeout = null)
         {
             using var connection = new SqlServerManagedInstance(DefaultConnectionString);
-            await foreach (var row in connection.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource, param))
+            await foreach (var row in connection.QueryUnbufferedAsync<T>(sqlTextOrEmbeddedResource, param, commandTimeout))
                 yield return row;
         }
 
