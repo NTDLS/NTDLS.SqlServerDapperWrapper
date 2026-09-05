@@ -15,9 +15,9 @@
 		<RepositoryUrl>https://github.com/NTDLS/NTDLS.SqlServerDapperWrapper</RepositoryUrl>
 		<RepositoryType>Git</RepositoryType>
 		<PackageReleaseNotes>
-			Added command timeout support for SQL Server connections.
+			Dependency updates.
 		</PackageReleaseNotes>
-		<Version>1.5.4</Version>
+		<Version>1.5.5</Version>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageTags>sqlserver;dapper;managed;simple;</PackageTags>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -53,7 +53,7 @@
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.11" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.11" />
-		<PackageReference Include="NTDLS.EmbeddedResource" Version="1.0.5" />
+		<PackageReference Include="NTDLS.EmbeddedResource" Version="1.0.6" />
 	</ItemGroup>
 
 </Project>
