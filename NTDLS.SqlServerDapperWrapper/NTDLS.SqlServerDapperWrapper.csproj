@@ -22,7 +22,6 @@
 		<PackageTags>sqlserver;dapper;managed;simple;</PackageTags>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
