@@ -15,9 +15,9 @@
 		<RepositoryUrl>https://github.com/NTDLS/NTDLS.SqlServerDapperWrapper</RepositoryUrl>
 		<RepositoryType>Git</RepositoryType>
 		<PackageReleaseNotes>
-			Dependency updates.
+			Update dependencies and override vulnerable cryptography package
 		</PackageReleaseNotes>
-		<Version>1.5.5</Version>
+		<Version>1.5.6</Version>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageTags>sqlserver;dapper;managed;simple;</PackageTags>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
