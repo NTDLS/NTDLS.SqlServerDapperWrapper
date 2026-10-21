@@ -48,11 +48,22 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Dapper" Version="2.1.79" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.11" />
+		<PackageReference Include="Dapper" Version="2.1.89" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.13" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.13" />
 		<PackageReference Include="NTDLS.EmbeddedResource" Version="1.0.6" />
+	</ItemGroup>
+
+	<!-- Override the vulnerable transitive System.Security.Cryptography.Pkcs pulled in by Microsoft.Data.SqlClient. -->
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="8.0.2" />
+	</ItemGroup>
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net9.0' ">
+		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="9.0.21" />
+	</ItemGroup>
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net10.0' ">
+		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
 	</ItemGroup>
 
 </Project>
